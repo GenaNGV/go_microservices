@@ -1,15 +1,15 @@
 package main
 
 import (
+	"auth/controler"
 	"auth/dao"
-	"auth/router"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func createRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/login", router.Authenticate).Methods("POST")
+	r.HandleFunc("/login", controler.Authenticate).Methods("POST")
 	return r
 }
 
