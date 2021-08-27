@@ -4,17 +4,17 @@ import (
 	service "auth/service"
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 func Authenticate(w http.ResponseWriter, r *http.Request) {
 
-	log.Print("Authenticate...")
+	log.Trace("Authenticate user")
 	err := r.ParseForm()
 
 	if err != nil {
-		fmt.Println(fmt.Errorf("Error: %v", err))
+		log.Error("Unable to parse form ", fmt.Errorf("Error: %v", err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

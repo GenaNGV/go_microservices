@@ -3,6 +3,7 @@ package main
 import (
 	"auth/controler"
 	"auth/dao"
+	"auth/utils"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -14,6 +15,7 @@ func createRouter() *mux.Router {
 }
 
 func main() {
+	utils.Initialize("students.log")
 	dao.DatabaseConnect()
 
 	router := createRouter()
