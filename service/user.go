@@ -12,10 +12,10 @@ const INVALID_USERNAME_PASSWORD string = "Invalid email or password"
 
 func Authenticate(email string, password string) (*model.User, error) {
 
-	user := new(model.User)
+	user, error := dao.GetUserByEmail(email)
 
-	if res := dao.DB.Where(&model.User{Email: email}).First(&user); res.RowsAffected <= 0 {
-		log.Error("Email not found, ", email)
+	if error != nil {
+		log.Error(error, " ", email)
 		err := errors.New(INVALID_USERNAME_PASSWORD)
 		return nil, err
 	}

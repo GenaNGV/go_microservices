@@ -16,7 +16,7 @@ func createRouter() *mux.Router {
 
 func main() {
 	utils.Initialize("students.log")
-	dao.DatabaseConnect()
+	dao.Iniialize()
 
 	router := createRouter()
 	err := http.ListenAndServe(":3002", router)
