@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
 	github.com/sirupsen/logrus v1.4.2
@@ -25,6 +26,8 @@ require (
 	github.com/jinzhu/now v1.1.2 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/lib/pq v1.10.2 // indirect
-	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
-	golang.org/x/text v0.3.3 // indirect
+	github.com/onsi/ginkgo v1.16.4 // indirect
+	github.com/onsi/gomega v1.15.0 // indirect
+	golang.org/x/sys v0.0.0-20210423082822-04245dca01da // indirect
+	golang.org/x/text v0.3.6 // indirect
 )
