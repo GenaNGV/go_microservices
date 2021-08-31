@@ -3,7 +3,6 @@ package main
 import (
 	"auth/controler"
 	"auth/enviroment"
-	"auth/utils"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -15,10 +14,9 @@ func createRouter() *mux.Router {
 	return r
 }
 
-Eev *Envi
 func main() {
-	utils.Initialize("students.log")
-	enviroment.Initialize()
+
+	enviroment.Env = enviroment.NewEnvironment()
 
 	router := createRouter()
 	err := http.ListenAndServe(":3002", router)

@@ -44,7 +44,7 @@ func Check(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	user, err := service.Validate(authorization)
+	user, err := service.Check(authorization)
 
 	if err != nil {
 		_, _ = w.Write([]byte(err.Error()))

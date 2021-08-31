@@ -1,6 +1,7 @@
 package enviroment
 
 import (
+	"auth/utils"
 	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/joho/godotenv"
@@ -16,7 +17,11 @@ type Environment struct {
 	RDB *redis.Client
 }
 
+var Env *Environment
+
 func NewEnvironment() *Environment {
+
+	utils.Initialize("students.log")
 
 	err := godotenv.Load()
 	if err != nil {
