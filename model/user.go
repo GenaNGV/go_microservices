@@ -9,17 +9,13 @@ type User struct {
 	Email     string     `json:"email"`
 	Password  string     `json:"-"`
 	Created   time.Time  `json:"created"`
-	Deleted   *time.Time `json:"deleted,omitempty"`
+	Deleted   *time.Time `json:"deleted,omitempty" gorm:"index"`
 	DeletedBy *uint      `json:"deletedBy,omitempty"`
 	LastLogin *time.Time `json:"lastLogin,omitempty"`
 	FirstName string     `json:"firstName"`
 	LastName  string     `json:"lastName"`
 
-	Roles []*Role `gorm:"many2many:user_role"`
-}
-
-func (user *User) TableName() string {
-	return "user"
+	Roles []*Role `json:"roles" gorm:"many2many:user_role"`
 }
 
 type Role struct {
@@ -27,13 +23,17 @@ type Role struct {
 	Name string `json:"name"`
 }
 
-func (role *Role) TableName() string {
-	return "role"
-}
-
 type UserRole struct {
 	UserId uint `gorm:"primaryKey;autoIncrement:false"`
 	RoleId uint `gorm:"primaryKey;autoIncrement:false"`
+}
+
+func (user *User) TableName() string {
+	return "user"
+}
+
+func (role *Role) TableName() string {
+	return "role"
 }
 
 func (userRole *UserRole) TableName() string {

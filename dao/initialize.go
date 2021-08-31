@@ -22,7 +22,7 @@ func Iniialize() {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
 		os.Getenv("POSTGRES_HOSt"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_PORT"))
 
-	log.Info("Connecting to Postgre...")
+	log.Info("connecting to Postgre...")
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
@@ -32,5 +32,5 @@ func Iniialize() {
 		os.Exit(2)
 	}
 
-	log.Info("connected")
+	log.Info("connected to Postgre")
 }

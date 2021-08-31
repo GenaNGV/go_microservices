@@ -10,11 +10,11 @@ import (
 
 func Authenticate(w http.ResponseWriter, r *http.Request) {
 
-	log.Trace("Authenticate user")
+	log.Trace("authenticate user")
 	err := r.ParseForm()
 
 	if err != nil {
-		log.Error("Unable to parse form ", fmt.Errorf("Error: %v", err))
+		log.Error("unable to parse form ", fmt.Errorf("Error: %v", err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
