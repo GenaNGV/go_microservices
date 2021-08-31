@@ -4,13 +4,17 @@ import (
 	"auth/dao"
 	"auth/model"
 	"errors"
+	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
+	"strconv"
+	"time"
 )
 
 const INVALID_USERNAME_PASSWORD string = "Invalid email or password"
+const SECRET_KEY = "iTechArtGoLab"
 
-func Authenticate(email string, password string) (*model.User, error) {
+func Authenticate(email string, password string) (*model.UserAuth, error) {
 
 	user, error := dao.GetUserByEmail(email)
 
@@ -32,5 +36,16 @@ func Authenticate(email string, password string) (*model.User, error) {
 		return nil, err
 	}
 
-	return user, nil
+	// 2 hours
+	expired := time.Now().Add(time.Hour * 2).Unix()
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    strconv.Itoa(int(user.Id)),
+		ExpiresAt: expired,
+	})
+
+	token, _ := claims.SignedString([]byte(SECRET_KEY))
+
+	auth := model.UserAuth{UserDetail: *user, Token: token, Expired: expired}
+
+	return &auth, nil
 }
