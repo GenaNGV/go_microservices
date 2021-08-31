@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Authenticate(w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request) {
 
 	log.Trace("authenticate user")
 	err := r.ParseForm()
@@ -25,6 +25,26 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	user, err := service.Authenticate(email, password)
+
+	if err != nil {
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	userBytes, err := json.Marshal(user)
+
+	_, _ = w.Write(userBytes)
+}
+
+func Check(w http.ResponseWriter, r *http.Request) {
+
+	log.Trace("login user")
+
+	authorization := r.Header.Get("Authorization")
+
+	w.Header().Set("Content-Type", "application/json")
+
+	user, err := service.Validate(authorization)
 
 	if err != nil {
 		_, _ = w.Write([]byte(err.Error()))

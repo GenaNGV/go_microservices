@@ -37,15 +37,58 @@ func Authenticate(email string, password string) (*model.UserAuth, error) {
 	}
 
 	// 2 hours
-	expired := time.Now().Add(time.Hour * 2).Unix()
+	expired := time.Now().Add(time.Hour * 2)
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    strconv.Itoa(int(user.Id)),
-		ExpiresAt: expired,
+		ExpiresAt: expired.Unix(),
 	})
 
 	token, _ := claims.SignedString([]byte(SECRET_KEY))
 
 	auth := model.UserAuth{UserDetail: *user, Token: token, Expired: expired}
 
+	auth.Put()
+
 	return &auth, nil
 }
+
+/*
+func Validate(token string) (*model.UserAuth, error) {
+	user := new(model.UserAuth)
+	user, error := user..UserAuth{.}GetUserByEmail(email)
+
+	if error != nil {
+		log.Error(error, " ", email)
+		err := errors.New(INVALID_USERNAME_PASSWORD)
+		return nil, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		log.Error("Invalid password, email ", email)
+		err = errors.New(INVALID_USERNAME_PASSWORD)
+		return nil, err
+	}
+
+	if user.Deleted != nil {
+		log.Error("User has been deleted, email ", email)
+		err := errors.New(INVALID_USERNAME_PASSWORD)
+		return nil, err
+	}
+
+	// 2 hours
+	expired := time.Now().Add(time.Hour * 2)
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    strconv.Itoa(int(user.Id)),
+		ExpiresAt: expired.Unix(),
+	})
+
+	token, _ := claims.SignedString([]byte(SECRET_KEY))
+
+	auth := model.UserAuth{UserDetail: *user, Token: token, Expired: expired}
+
+	//redis.seredis.PutUserAuth(&auth)
+
+	return &auth, nil
+}
+
+*/
