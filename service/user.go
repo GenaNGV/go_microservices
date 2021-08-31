@@ -12,30 +12,28 @@ import (
 	"time"
 )
 
-const INVALID_USERNAME_PASSWORD string = "Invalid email or password"
-const UNAUTORIZED string = "Unauthorized"
-const SECRET_KEY = "iTechArtGoLab"
+const SecretKey = "iTechArtGoLab"
+
+var ErrInvalidUsernamePassword = errors.New("invalid email or password")
+var ErrUnauthorized = errors.New("unauthorized")
 
 func Authenticate(email string, password string) (*model.UserAuth, error) {
 
-	user, error := pg.GetUserByEmail(email)
+	user, err := pg.GetUserByEmail(email)
 
-	if error != nil {
-		log.Error(error, " ", email)
-		err := errors.New(INVALID_USERNAME_PASSWORD)
-		return nil, err
+	if err != nil {
+		log.Error(err, " ", email)
+		return nil, ErrInvalidUsernamePassword
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		log.Error("Invalid password, email ", email)
-		err = errors.New(INVALID_USERNAME_PASSWORD)
-		return nil, err
+		log.WithFields(log.Fields{"email": email}).Error("Invalid password")
+		return nil, ErrInvalidUsernamePassword
 	}
 
 	if user.Deleted != nil {
-		log.Error("User has been deleted, email ", email)
-		err := errors.New(INVALID_USERNAME_PASSWORD)
-		return nil, err
+		log.WithFields(log.Fields{"email": email}).Error("User has been deleted")
+		return nil, ErrInvalidUsernamePassword
 	}
 
 	// 2 hours
@@ -45,7 +43,7 @@ func Authenticate(email string, password string) (*model.UserAuth, error) {
 		ExpiresAt: expired.Unix(),
 	})
 
-	token, _ := claims.SignedString([]byte(SECRET_KEY))
+	token, _ := claims.SignedString([]byte(SecretKey))
 
 	auth := model.UserAuth{User: *user, Token: token, Expired: expired}
 
@@ -55,30 +53,26 @@ func Authenticate(email string, password string) (*model.UserAuth, error) {
 }
 
 func Check(token string) (*model.UserAuth, error) {
-	user, error := redis.Get(token)
+	user, err := redis.Get(token)
 
-	if error != nil {
-		log.Error(error)
-		err := errors.New(UNAUTORIZED)
-		return nil, err
+	if err != nil {
+		log.Error(err)
+		return nil, ErrUnauthorized
 	}
 
 	if user == nil {
-		log.Error(error)
-		err := errors.New(UNAUTORIZED)
-		return nil, err
+		log.Error(err)
+		return nil, ErrUnauthorized
 	}
 
 	if user.Deleted != nil {
-		log.Error("User has been deleted, email ", user.Email)
-		err := errors.New(UNAUTORIZED)
-		return nil, err
+		log.WithFields(log.Fields{"email": user.Email}).Error("User has been deleted")
+		return nil, ErrUnauthorized
 	}
 
 	if user.Expired.Before(time.Now()) {
-		log.Error("Session has been expired, email ", user.Email)
-		err := errors.New(UNAUTORIZED)
-		return nil, err
+		log.WithFields(log.Fields{"email": user.Email}).Error("Session has been expired")
+		return nil, ErrUnauthorized
 	}
 
 	user.Expired = time.Now().Add(time.Hour * 2)

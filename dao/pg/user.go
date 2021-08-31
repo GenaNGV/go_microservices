@@ -6,13 +6,14 @@ import (
 	"errors"
 )
 
+var ErrUserNotFound = errors.New("user not found")
+
 func GetUserByEmail(email string) (*model.User, error) {
 
-	user := new(model.User)
+	user := &model.User{}
 
 	if res := enviroment.Env.DB.Preload("Roles").Where("email", email).Take(&user); res.RowsAffected <= 0 {
-		err := errors.New("user not found")
-		return nil, err
+		return nil, ErrUserNotFound
 	}
 
 	return user, nil

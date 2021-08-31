@@ -5,4 +5,4 @@
 *.ipr
 
 .env
-.log
+*.log
