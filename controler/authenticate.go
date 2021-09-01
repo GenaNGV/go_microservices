@@ -3,7 +3,6 @@ package controler
 import (
 	service "auth/service"
 	"encoding/json"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -14,7 +13,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 
 	if err != nil {
-		log.Error("unable to parse form ", fmt.Errorf("Error: %v", err))
+		log.WithError(err).Error("unable to parse form")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -27,13 +26,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	user, err := service.Authenticate(email, password)
 
 	if err != nil {
-		_, _ = w.Write([]byte(err.Error()))
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(err)
 		return
 	}
 
-	userBytes, err := json.Marshal(user)
-
-	_, _ = w.Write(userBytes)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
 }
 
 func Check(w http.ResponseWriter, r *http.Request) {
@@ -47,11 +46,11 @@ func Check(w http.ResponseWriter, r *http.Request) {
 	user, err := service.Check(authorization)
 
 	if err != nil {
-		_, _ = w.Write([]byte(err.Error()))
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(err)
 		return
 	}
 
-	userBytes, err := json.Marshal(user)
-
-	_, _ = w.Write(userBytes)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
 }

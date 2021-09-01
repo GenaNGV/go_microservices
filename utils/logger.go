@@ -6,9 +6,9 @@ import (
 	"os"
 )
 
-func Initialize(logFile string) {
+func InitializeLogger(fileName string) {
 
-	file, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
