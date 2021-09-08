@@ -13,11 +13,13 @@ import (
 )
 
 const SecretKey = "iTechArtGoLab"
+const TokenTTL = time.Hour * 1
 
 var ErrInvalidUsernamePassword = errors.New("invalid email or password")
 var ErrUnauthorized = errors.New("unauthorized")
+var ErrSystem = errors.New("oops, we will fix it quickly")
 
-func Authenticate(email string, password string) (*model.UserAuth, error) {
+func Login(email string, password string) (*model.UserAuth, error) {
 
 	user, err := pg.GetUserByEmail(email)
 
@@ -37,7 +39,7 @@ func Authenticate(email string, password string) (*model.UserAuth, error) {
 	}
 
 	// 2 hours
-	expired := time.Now().Add(time.Hour * 2)
+	expired := time.Now().Add(TokenTTL)
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    strconv.Itoa(int(user.Id)),
 		ExpiresAt: expired.Unix(),
@@ -47,12 +49,20 @@ func Authenticate(email string, password string) (*model.UserAuth, error) {
 
 	auth := model.UserAuth{User: *user, Token: token, Expired: expired}
 
-	redis.Put(&auth)
+	if err := redis.Put(&auth, time.Duration(TokenTTL)); err != nil {
+		log.WithFields(log.Fields{"email": email}).Error("System Exception")
+		return nil, ErrSystem
+	}
 
 	return &auth, nil
 }
 
-func Check(token string) (*model.UserAuth, error) {
+func Status(token string) (*model.UserAuth, error) {
+
+	if token == "" {
+		return nil, ErrUnauthorized
+	}
+
 	user, err := redis.Get(token)
 
 	if err != nil {
@@ -75,8 +85,12 @@ func Check(token string) (*model.UserAuth, error) {
 		return nil, ErrUnauthorized
 	}
 
-	user.Expired = time.Now().Add(time.Hour * 2)
-	redis.Put(user)
+	setAuthTokenTTL(user)
+	_ = redis.Put(user, time.Duration(TokenTTL))
 
 	return user, nil
+}
+
+func setAuthTokenTTL(u *model.UserAuth) {
+	u.Expired = time.Now().Add(TokenTTL)
 }

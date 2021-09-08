@@ -11,7 +11,7 @@ import (
 func createRouter() *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/login", controler.Login).Methods("POST")
-	r.HandleFunc("/status", controler.Check).Methods("GET")
+	r.HandleFunc("/status", controler.Status).Methods("GET")
 	return r
 }
 

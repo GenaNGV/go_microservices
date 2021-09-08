@@ -10,18 +10,24 @@ import (
 
 var ErrUserNotFound = errors.New("user not found")
 
-func Put(u *model.UserAuth) {
-	enviroment.Env.RDB.Set(u.Token, u, time.Duration(u.Expired.Unix()))
+func Put(u *model.UserAuth, duration time.Duration) error {
+	entry, err := json.Marshal(u)
+
+	if err == nil {
+		enviroment.Env.RDB.Set(u.Token, entry, duration)
+	}
+
+	return err
 }
 
 func Get(token string) (*model.UserAuth, error) {
 
-	val := enviroment.Env.RDB.Get(token)
-	if val == nil {
+	val, err := enviroment.Env.RDB.Get(token).Result()
+	if err != nil || val == "" {
 		return nil, ErrUserNotFound
 	} else {
 		userAuth := &model.UserAuth{}
-		err := json.Unmarshal([]byte(val.Val()), &userAuth)
+		err := json.Unmarshal([]byte(val), &userAuth)
 		if err != nil {
 			return nil, err
 		}
