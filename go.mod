@@ -7,6 +7,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	gorm.io/driver/postgres v1.1.0
