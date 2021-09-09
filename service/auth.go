@@ -57,7 +57,7 @@ func Login(email string, password string) (*model.UserAuth, error) {
 	return &auth, nil
 }
 
-func Status(token string) (*model.UserAuth, error) {
+func TokenDetail(token string) (*model.UserAuth, error) {
 
 	if token == "" {
 		return nil, ErrUnauthorized

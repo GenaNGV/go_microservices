@@ -35,9 +35,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(auth)
 }
 
-func Status(w http.ResponseWriter, r *http.Request) {
+func Parse(w http.ResponseWriter, r *http.Request) {
 
-	log.Trace("login user")
+	err := r.ParseForm()
+
+	if err != nil {
+		log.WithError(err).Error("unable to parse form")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	log.Trace("parse file {}")
+	log.WithFields(log.Fields{"file": email}).Error("Invalid password")
 
 	token := r.Header.Get("Authorization")
 
