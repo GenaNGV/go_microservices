@@ -29,7 +29,11 @@ func Parse(w http.ResponseWriter, r *http.Request) {
 		intValue = 1
 	}
 
-	jobInfo, err := service.Parse(file, uint(intValue))
+	token := r.Header.Get("Authorization")
+
+	user, _ := service.TokenDetail(token)
+
+	jobInfo, err := service.Parse(file, uint(intValue), user)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -41,4 +45,3 @@ func Parse(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(jobInfo)
 
 }
-

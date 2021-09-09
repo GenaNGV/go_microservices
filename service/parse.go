@@ -1,6 +1,7 @@
 package service
 
 import (
+	"auth/dao/pg"
 	"auth/model"
 	"github.com/pkg/errors"
 	"os"
@@ -10,7 +11,7 @@ var (
 	ErrMissedFile = errors.New("missed file")
 )
 
-func Parse(fileName string, chars uint) (*model.JobInfo, error) {
+func Parse(fileName string, chars uint, user *model.UserAuth) (*model.JobInfo, error) {
 
 	if fileName == "" {
 		return nil, ErrMissedFile
@@ -24,8 +25,7 @@ func Parse(fileName string, chars uint) (*model.JobInfo, error) {
 		return nil, ErrMissedFile
 	}
 
+	jobInfo := pg.SaveJob(fileName, user.Id)
 
-	return nil, nil
+	return jobInfo, nil
 }
-
-
