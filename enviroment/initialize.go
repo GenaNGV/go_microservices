@@ -21,12 +21,13 @@ var Env *Environment
 
 func NewEnvironment() *Environment {
 
-	utils.InitializeLogger("students.log")
-
 	err := godotenv.Load()
 	if err != nil {
-		log.WithError(err).Fatal("Error loading env file")
+		println("Error loading env file")
+		os.Exit(3)
 	}
+
+	utils.InitializeLogger(os.Getenv("LOG_PATH") + "students.log")
 
 	env := &Environment{}
 
