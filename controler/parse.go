@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"strconv"
+	"strings"
 )
 
 func Parse(w http.ResponseWriter, r *http.Request) {
@@ -24,16 +24,11 @@ func Parse(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	intValue, err := strconv.Atoi(chars)
-	if err != nil {
-		intValue = 1
-	}
+	arr := strings.Split(chars, ",")
 
-	token := r.Header.Get("Authorization")
+	user, _ := service.TokenDetail(r.Header.Get("Authorization"))
 
-	user, _ := service.TokenDetail(token)
-
-	jobInfo, err := service.Parse(file, uint(intValue), user)
+	jobInfo, err := service.Parse(file, arr, user)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

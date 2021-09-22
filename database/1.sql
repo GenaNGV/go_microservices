@@ -11,12 +11,12 @@ ALTER TABLE provisa.job_status
 
 CREATE TABLE provisa.job_info
 (
-    id            integer                  NOT NULL,
+    id            SERIAL                   NOT NULL,
     created       timestamp with time zone NOT NULL,
     file_name     character varying(50)    NOT NULL,
     created_by    integer,
     job_status_id integer                  NOT NULL,
-    finished      time with time zone,
+    finished      timestamp with time zone,
     PRIMARY KEY (id),
     CONSTRAINT "job_status_fk1" FOREIGN KEY (job_status_id)
         REFERENCES provisa."job_status" (id) MATCH SIMPLE
@@ -31,7 +31,7 @@ ALTER TABLE provisa.job_info
 
 CREATE TABLE provisa.job_statistic
 (
-    id          integer               NOT NULL,
+    id          SERIAL                NOT NULL,
     job_info_id integer               NOT NULL,
     count       integer               NOT NULL,
     term        character varying(20) NOT NULL,
@@ -57,5 +57,3 @@ values (3, 'finished');
 insert into provisa."job_status" (id, name)
 values (4, 'error');
 commit;
-
-
