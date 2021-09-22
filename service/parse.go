@@ -39,34 +39,37 @@ func Parse(fileName string, arr []string, user *model.UserAuth) (*model.JobInfo,
 
 func runJob(jobInfo *model.JobInfo, arr []string) {
 
-	var wg sync.WaitGroup
+	log.WithFields(log.Fields{"file": jobInfo.FileName, "job": *jobInfo.Id}).Info("Parsing")
 
-	defer wg.Done()
+	var wg sync.WaitGroup
 
 	channel := make(chan int, 1)
 	channel <- 0
 
 	for i := 0; i < len(arr); i++ {
 		wg.Add(1)
-		go findTerm(jobInfo, arr[i], channel, i)
+
+		j := i
+
+		go func() {
+			defer wg.Done()
+			findTerm(jobInfo, arr[j], channel)
+		}()
 	}
+
 	wg.Wait()
 
-	log.WithFields(log.Fields{"file": jobInfo.FileName, "total": <-channel}).Info("Finished Parsing file")
-
+	log.WithFields(log.Fields{"job": *jobInfo.Id}).Info("Saving to database")
 	finished := time.Now()
 	jobInfo.Finished = &finished
 	jobInfo.Status = 3
 
 	pg.SaveJob(jobInfo)
-
-	// out results
-
 }
 
-func findTerm(jobInfo *model.JobInfo, term string, channel chan int, index int) {
+func findTerm(jobInfo *model.JobInfo, term string, channel chan int) {
 
-	log.WithFields(log.Fields{"file": jobInfo.FileName, "term": term}).Info("Parsing file")
+	log.WithFields(log.Fields{"job": *jobInfo.Id, "term": term}).Info("Starting")
 
 	f, err := os.Open(jobInfo.FileName)
 
@@ -80,14 +83,12 @@ func findTerm(jobInfo *model.JobInfo, term string, channel chan int, index int) 
 	jobStatics := &model.JobStatics{JobInfoId: jobInfo.Id, Count: 0, Term: term}
 
 	scanner := bufio.NewScanner(f)
-	row := 0
 
 	var old int
 	for scanner.Scan() {
 		line := scanner.Text()
 
 		index := strings.Index(line, term)
-		row++
 
 		for index >= 0 {
 			jobStatics.Count = jobStatics.Count + 1
@@ -95,14 +96,14 @@ func findTerm(jobInfo *model.JobInfo, term string, channel chan int, index int) 
 			old = <-channel
 			channel <- 1 + old
 
-			log.WithFields(log.Fields{"file": jobInfo.FileName, "term": term, "row": row, "found": jobStatics.Count, "total": 1 + old}).Info("Processing file")
+			log.WithFields(log.Fields{"job": *jobInfo.Id, "term": term, "found": jobStatics.Count, "total": 1 + old}).Info("Processing")
 
 			line = line[index+1:]
 			index = strings.Index(line, term)
 		}
 	}
 
-	log.WithFields(log.Fields{"file": jobInfo.FileName, "term": term, "found": jobStatics.Count}).Info("Parsed file")
+	log.WithFields(log.Fields{"job": *jobInfo.Id, "term": term, "found": jobStatics.Count}).Info("Processed")
 
 	pg.SaveJobStatics(jobStatics)
 }
