@@ -17,7 +17,7 @@ var (
 	ErrMissedFile = errors.New("missed file")
 )
 
-func Parse(fileName string, arr []string, user *model.UserAuth) (*model.JobInfo, error) {
+func Parse(fileName string, terms []string, user *model.UserAuth) (*model.JobInfo, error) {
 
 	if fileName == "" {
 		return nil, ErrMissedFile
@@ -33,12 +33,12 @@ func Parse(fileName string, arr []string, user *model.UserAuth) (*model.JobInfo,
 
 	jobInfo := pg.CreateJob(fileName, user.Id)
 
-	go runJob(jobInfo, arr)
+	go runJob(jobInfo, terms)
 
 	return jobInfo, nil
 }
 
-func runJob(jobInfo *model.JobInfo, arr []string) {
+func runJob(jobInfo *model.JobInfo, terms []string) {
 
 	log.WithFields(log.Fields{"file": jobInfo.FileName, "job": *jobInfo.Id}).Info("Parsing")
 
@@ -47,14 +47,14 @@ func runJob(jobInfo *model.JobInfo, arr []string) {
 	channel := make(chan int, 1)
 	channel <- 0
 
-	for i := 0; i < len(arr); i++ {
+	for i := 0; i < len(terms); i++ {
 		wg.Add(1)
 
 		j := i
 
 		go func() {
 			defer wg.Done()
-			findTerm(jobInfo, arr[j], channel)
+			findTerm(jobInfo, terms[j], channel)
 		}()
 	}
 
@@ -79,7 +79,9 @@ func findTerm(jobInfo *model.JobInfo, term string, channel chan int) {
 		return
 	}
 
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 
 	jobStatics := &model.JobStatics{JobInfoId: jobInfo.Id, Count: 0, Term: term}
 
