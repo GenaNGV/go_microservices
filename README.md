@@ -1,12 +1,4 @@
-create .env file
-
-POSTGRES_USER=provisa
-POSTGRES_PASSWORD=111111
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=provisa
-
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-LOG_PATH=d:/
+1. install postgre
+2. create database from /database
+3. install redis
+4. create .env file - example in .env.example

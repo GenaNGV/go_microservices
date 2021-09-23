@@ -3,6 +3,7 @@ package service
 import (
 	"auth/dao/pg"
 	"auth/model"
+	"auth/utils"
 	"bufio"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -62,7 +63,7 @@ func runJob(jobInfo *model.JobInfo, arr []string) {
 	log.WithFields(log.Fields{"job": *jobInfo.Id}).Info("Saving to database")
 	finished := time.Now()
 	jobInfo.Finished = &finished
-	jobInfo.Status = 3
+	jobInfo.Status = utils.Job_status_finished
 
 	pg.SaveJob(jobInfo)
 }
