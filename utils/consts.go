@@ -1,6 +1,10 @@
 package utils
 
-const Job_status_assigned uint = 1
-const Job_status_processing uint = 2
-const Job_status_finished uint = 3
-const Job_status_error uint = 4
+type JobStatus uint
+
+const (
+	Assigned   JobStatus = 1
+	Processing JobStatus = 2
+	Finished   JobStatus = 3
+	Error      JobStatus = 4
+)

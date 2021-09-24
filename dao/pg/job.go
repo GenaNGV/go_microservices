@@ -9,9 +9,7 @@ import (
 
 func CreateJob(fileName string, userId uint) *model.JobInfo {
 
-	jobInfo := &model.JobInfo{FileName: fileName, CreatedBy: userId, Status: utils.Job_status_assigned, Created: time.Now()}
-
-	enviroment.Env.DB.Create(jobInfo)
+	jobInfo := &model.JobInfo{FileName: fileName, CreatedBy: userId, Status: utils.Assigned, Created: time.Now()}
 
 	return jobInfo
 }

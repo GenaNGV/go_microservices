@@ -1,16 +1,17 @@
 package model
 
 import (
+	"auth/utils"
 	"time"
 )
 
 type JobInfo struct {
-	Id        *uint      `json:"id" gorm:"primaryKey"`
-	Created   time.Time  `json:"created"`
-	CreatedBy uint       `json:"createdBy"`
-	FileName  string     `json:"fileName"`
-	Status    uint       `json:"status" gorm:"column:job_status_id"`
-	Finished  *time.Time `json:"finished,omitempty"`
+	Id        *uint           `json:"id" gorm:"primaryKey"`
+	Created   time.Time       `json:"created"`
+	CreatedBy uint            `json:"createdBy"`
+	FileName  string          `json:"fileName"`
+	Status    utils.JobStatus `json:"status" gorm:"column:job_status_id"`
+	Finished  *time.Time      `json:"finished,omitempty"`
 
 	Statistics []*JobStatics `json:"statistics" gorm:"one2many:job_statistic"`
 }

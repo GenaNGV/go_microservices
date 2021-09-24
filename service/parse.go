@@ -2,6 +2,7 @@ package service
 
 import (
 	"auth/dao/pg"
+	"auth/enviroment"
 	"auth/model"
 	"auth/utils"
 	"bufio"
@@ -19,19 +20,24 @@ var (
 
 func Parse(fileName string, terms []string, user *model.UserAuth) (*model.JobInfo, error) {
 
+	jobInfo := pg.CreateJob(fileName, user.Id)
+
 	if fileName == "" {
+		finishJob(jobInfo, utils.Error)
+
 		return nil, ErrMissedFile
 	}
 
 	fileInfo, err := os.Stat(fileName)
 	if os.IsNotExist(err) {
-		return nil, ErrMissedFile
-	}
-	if fileInfo.IsDir() {
+		finishJob(jobInfo, utils.Error)
 		return nil, ErrMissedFile
 	}
 
-	jobInfo := pg.CreateJob(fileName, user.Id)
+	if fileInfo.IsDir() {
+		finishJob(jobInfo, utils.Error)
+		return nil, ErrMissedFile
+	}
 
 	go runJob(jobInfo, terms)
 
@@ -39,6 +45,9 @@ func Parse(fileName string, terms []string, user *model.UserAuth) (*model.JobInf
 }
 
 func runJob(jobInfo *model.JobInfo, terms []string) {
+
+	jobInfo.Status = utils.Processing
+	enviroment.Env.DB.Save(jobInfo)
 
 	log.WithFields(log.Fields{"file": jobInfo.FileName, "job": *jobInfo.Id}).Info("Parsing")
 
@@ -61,11 +70,7 @@ func runJob(jobInfo *model.JobInfo, terms []string) {
 	wg.Wait()
 
 	log.WithFields(log.Fields{"job": *jobInfo.Id}).Info("Saving to database")
-	finished := time.Now()
-	jobInfo.Finished = &finished
-	jobInfo.Status = utils.Job_status_finished
-
-	pg.SaveJob(jobInfo)
+	finishJob(jobInfo, utils.Finished)
 }
 
 func findTerm(jobInfo *model.JobInfo, term string, channel chan int) {
@@ -109,4 +114,13 @@ func findTerm(jobInfo *model.JobInfo, term string, channel chan int) {
 	log.WithFields(log.Fields{"job": *jobInfo.Id, "term": term, "found": jobStatics.Count}).Info("Processed")
 
 	pg.SaveJobStatics(jobStatics)
+}
+
+func finishJob(jobInfo *model.JobInfo, status utils.JobStatus) {
+
+	finished := time.Now()
+	jobInfo.Finished = &finished
+	jobInfo.Status = status
+
+	enviroment.Env.DB.Save(jobInfo)
 }
