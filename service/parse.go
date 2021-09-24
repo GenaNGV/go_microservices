@@ -50,11 +50,11 @@ func runJob(jobInfo *model.JobInfo, terms []string) {
 	for i := 0; i < len(terms); i++ {
 		wg.Add(1)
 
-		j := i
+		term := terms[i]
 
 		go func() {
 			defer wg.Done()
-			findTerm(jobInfo, terms[j], channel)
+			findTerm(jobInfo, term, channel)
 		}()
 	}
 
