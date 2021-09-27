@@ -108,26 +108,26 @@ func runConcurrentJob(jobInfo *model.JobInfo, terms []string) {
 
 			term := terms[i]
 
-			go func() {
-				//defer wg.Done()
-				log.WithFields(log.Fields{"job": *jobInfo.Id, "term": term, "line": line}).Info("...")
+			go func(c chan<- int) {
+				defer wg.Done()
+				log.WithFields(log.Fields{"job": *jobInfo.Id, "term": term, "line": line}).Info("locate...")
 
-				findConcurrentTerm(term, channel, line)
-			}()
+				findConcurrentTerm(term, c, line)
+			}(channel)
 		}
 	}
 
 	go func(c chan int) {
 		wg.Wait()
-
 		close(c)
+
+		log.WithFields(log.Fields{"job": *jobInfo.Id, "total": total}).Info("calculate...")
 	}(channel)
 
 	for v := range channel {
-		log.Fatal(v)
+		log.WithFields(log.Fields{"job": *jobInfo.Id, "value": v}).Info("summary...")
+		total += v
 	}
-	//rowValue := <- c
-	//total += rowValue
 
 	log.WithFields(log.Fields{"job": *jobInfo.Id, "total": total}).Info("Saving to database")
 	finishJob(jobInfo, utils.Finished)
