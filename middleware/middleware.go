@@ -8,7 +8,7 @@ import (
 
 func Validate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if req.URL.Path == "/login" {
+		if req.URL.Path == "/login" || req.URL.Path == "/parse" {
 			next.ServeHTTP(w, req)
 		} else {
 			token := req.Header.Get("Authorization")
