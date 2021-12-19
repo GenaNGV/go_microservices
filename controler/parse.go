@@ -20,7 +20,8 @@ func Parse(w http.ResponseWriter, r *http.Request) {
 
 	file := r.FormValue("file")
 	searchTerm := r.FormValue("chars")
-	log.WithFields(log.Fields{"file": file}).Trace("Parsing file")
+	rule := r.FormValue("rule")
+	log.WithFields(log.Fields{"file": file, "rule": rule}).Trace("Parsing file")
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -28,7 +29,7 @@ func Parse(w http.ResponseWriter, r *http.Request) {
 
 	user, _ := service.TokenDetail(r.Header.Get("Authorization"))
 
-	jobInfo, err := service.Parse(file, terms, user)
+	jobInfo, err := service.Parse(file, terms, user, rule)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -38,5 +39,4 @@ func Parse(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(jobInfo)
-
 }
